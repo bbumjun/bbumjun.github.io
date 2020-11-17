@@ -1,0 +1,189 @@
+<html lang="ko">
+  <head>
+    <title>BARAMGABI - GACHON Univ.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="web programming term project" />
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="css/common.css" />
+    <script src="js/load-image.all.min.js"></script>
+
+    <script>
+      document.onreadystatechange = function () {
+        if (document.readyState === "complete") {
+          if (localStorage.getItem("alcoholList") != null) {
+            var alcoholList = JSON.parse(localStorage.getItem("alcoholList"))
+            display()
+          } else {
+            var xhr = new XMLHttpRequest()
+            var target = "./json/alcohol_info.json"
+
+            xhr.open("GET", target)
+            xhr.send()
+
+            xhr.onreadystatechange = function () {
+              if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status == 200) {
+                  alcoholList = JSON.parse(xhr.responseText)
+                  localStorage.setItem(
+                    "alcoholList",
+                    JSON.stringify(alcoholList)
+                  )
+                  display()
+                }
+              }
+            }
+          }
+
+          function display() {
+            for (let i = 0; i < Object.keys(alcoholList).length; i++) {
+              var table = document.getElementById("thumb")
+
+              if (i % 3 == 0) {
+                var tableRow = document.createElement("tr")
+                table.appendChild(tableRow)
+              }
+
+              var td = document.createElement("td")
+              td.classList.add("thumb-td")
+              tableRow.appendChild(td)
+
+              var link = document.createElement("a")
+              link.href = "detail.html?category=alcohol&num=" + i
+
+              td.appendChild(link)
+
+              var thumbImg = document.createElement("div")
+              thumbImg.id = "thumbImg" + i
+              thumbImg.classList.add("thumbnail-img")
+
+              link.appendChild(thumbImg)
+
+              var img_src = alcoholList[i].photo_url[0]
+              loadImage(
+                img_src,
+                function (img_src, data) {
+                  if (img_src.type === "error") {
+                    console.log("error")
+                  } else {
+                    var div = document.getElementById("thumbImg" + i)
+                    div.appendChild(img_src)
+                  }
+                },
+                {
+                  maxWidth: 400,
+                  maxHeight: 400,
+                  orientation: false,
+                  crop: true,
+                }
+              )
+
+              var thumbDesc = document.createElement("div")
+              thumbDesc.style.marginTop = "10"
+              td.appendChild(thumbDesc)
+
+              var title = document.createElement("strong")
+              title.id = "thumb-desc"
+              title.innerText = alcoholList[i].name
+              thumbDesc.appendChild(title)
+
+              var comment = document.createElement("span")
+              comment.style.cssFloat = "right"
+              comment.innerHTML =
+                '<img id="like-icon" src="img/comments.png" class="button-img">&nbsp; (' +
+                alcoholList[i].comment.length +
+                ")"
+              thumbDesc.appendChild(comment)
+
+              var like = document.createElement("span")
+              like.classList.add("like")
+              like.id = "like" + i
+
+              like.addEventListener("click", function () {
+                alcoholList[i].like++
+                document.getElementById("like" + i).innerHTML =
+                  '<img id="like-icon" src="img/like.png" class="button-img">&nbsp; (' +
+                  alcoholList[i].like +
+                  ")"
+                localStorage.setItem("alcoholList", JSON.stringify(alcoholList))
+              })
+
+              like.innerHTML =
+                '<img id="like-icon" src="img/like.png" class="button-img">&nbsp; (' +
+                alcoholList[i].like +
+                ")"
+              thumbDesc.appendChild(like)
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+
+  <body>
+    <header>
+      <div class="container">
+        <div style="padding: 10 0; font: large bold">
+          <a href="index.html" style="font-size: 30px">
+            <img
+              src="img/pinwheel.png"
+              alt="logo"
+              style="margin-bottom: -4px; width: 30px; height: 30px"
+            />BARAMGABI
+          </a>
+        </div>
+      </div>
+    </header>
+    <div style="background: rgb(233, 233, 233); width: 100%; height: 200px">
+      <div class="container" style="text-align: center">
+        <div class="main_text">
+          학교 주변 <strong>카페 / 음식점 / 술집</strong> 을 한눈에 확인해보세요
+          <form
+            action="./search.html"
+            method="GET"
+            style="padding: 20"
+            accept-charset="UTF-8"
+          >
+            <img
+              class="button-img"
+              src="img/search.png"
+              style="width: 20px; height: 20px; vertical-align: sub"
+            />
+            <input
+              class="search_area"
+              type="text"
+              placeholder="매장 검색"
+              name="search_text"
+            />
+            <input type="submit" value="검색" />
+          </form>
+        </div>
+      </div>
+    </div>
+    <nav class="container">
+      <ul>
+        <li><a href="index.html">카페</a></li>
+        <li><a href="food_list.html">음식점</a></li>
+        <li><a href="alchohol_list.html" style="font-weight: bold">술집</a></li>
+      </ul>
+    </nav>
+    <br />
+
+    <section class="container">
+      <hr />
+      <table id="thumb"></table>
+    </section>
+    <footer>
+      <div
+        class="text-center"
+        style="
+          margin: 50px;
+          font-family: 'Courier New', Courier, monospace;
+          text-align: center;
+        "
+      >
+        <hr />
+        Designed by 배범준 & 유인재
+      </div>
+    </footer>
+  </body>
+</html>

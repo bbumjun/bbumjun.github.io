@@ -1,0 +1,325 @@
+<html lang="ko">
+
+<head>
+    <title>BARAMGABI - GACHON Univ.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="web programming term project">
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/common.css">
+    <script src="js/load-image.all.min.js"></script>
+    <script>
+        // 파라미터 받기
+        var urlParams = location.search.split(/[?&]/).slice(1).map(function (paramPair) {
+            return paramPair.split(/=(.+)?/).slice(0, 2);
+        }).reduce(function (obj, pairArray) {
+            obj[pairArray[0]] = pairArray[1];
+            return obj;
+        }, {});
+
+
+        var category = urlParams.category;
+        var index = urlParams.num;
+        var info;
+
+
+        document.onreadystatechange = function () {
+            if (document.readyState === 'complete') {
+
+    
+                //json 받기
+                var xhr = new XMLHttpRequest();
+                var target;
+                if (category == 'cafe') {
+                    target = "./json/cafe_info.json";
+                    info = 'cafeList';
+
+                } else if (category == 'food') {
+                    target = "./json/food_info.json";
+                    info = 'foodList';
+
+                } else if (category == 'alcohol') {
+                    target = "./json/alcohol_info.json";
+                    info = 'alcoholList';
+                }
+
+                if (localStorage.getItem(info) != null) {
+                    detailInfo = JSON.parse(localStorage.getItem(info));
+                    display();
+                }
+                else {
+                    xhr.open("GET", target);
+                    xhr.send();
+
+
+                    xhr.onreadystatechange = function () {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status == 200) {
+                                var detailInfo = JSON.parse(xhr.responseText);
+                                localStorage.setItem(info, JSON.stringify(detailInfo));
+                                display();
+                            }
+                        }
+                    }
+                }
+
+                function display(){
+                    
+
+                var title = document.getElementById('store_title');
+                title.innerText = detailInfo[index].name;
+
+                var likeNum = document.getElementById('like_num');
+                console.log(likeNum);
+                likeNum.innerText = detailInfo[index].like;
+
+                var comments_num = document.getElementById('comments_num');
+                console.log(comments_num);
+                comments_num.innerText=detailInfo[index].comment.length;
+                var categoryName = document.getElementById('category_name');
+                categoryName.innerText = category;
+
+                document.getElementById('store_url').href = detailInfo[index].url;
+
+                document.getElementById('address_url').href = 'https://www.google.com/maps/place/' + detailInfo[index].address;
+                document.getElementById('address_url').innerText = detailInfo[index].address;
+
+                document.getElementById('phone_num').innerHTML = '<img class="icon-img" src="img/phone-receiver.png">' + detailInfo[index].contact;
+
+
+                for (var i = 0; i < detailInfo[index].photo_url.length; i++) {
+                    var img_src = detailInfo[index].photo_url[i];
+                    loadImage(
+                        img_src,
+                        function (img_src, data) {
+                            if (img_src.type === 'error') {
+                                console.log('error');
+                            } else {
+                                var photo = document.createElement('div');
+                                photo.classList.add('photo');
+                                var container = document.getElementById('photos');
+                                container.appendChild(photo);
+                                photo.appendChild(img_src);
+
+                            }
+                        },
+                        {
+                            orientation: false,
+                            maxWidth: 900,
+                            maxHeight: 900,
+
+                        }
+                    );
+                }
+
+                var tbody = document.getElementById('menu_tbody');
+                for (var i = 0; i < detailInfo[index].menu.length; i++) {
+
+                    if (i % 2 == 0) {
+                        var tr = document.createElement('tr');
+                        tbody.appendChild(tr);
+                    }
+
+                    var td1 = document.createElement('td');
+                    td1.innerText = detailInfo[index].menu[i].name;
+                    tr.appendChild(td1);
+                    var td2 = document.createElement('td');
+                    td2.innerText = detailInfo[index].menu[i].price;
+                    tr.appendChild(td2);
+
+                }
+                document.getElementById('comment_num').innerText=detailInfo[index].comment.length;
+                var commentList = document.getElementById('comment_container');
+                for(var k=0;k<detailInfo[index].comment.length;k++) {
+                    var c_info = detailInfo[index].comment[k];
+                    commentList.innerHTML+='<strong>'+c_info.nickname+'<strong><span class="comment_time">'+c_info.time+'</span>';
+                    commentList.innerHTML+='<div class="comment_delete" style="float:right" onclick="delComment('+k+')">삭제</div>';
+                    commentList.innerHTML+='<p>'+c_info.sentence+'<p>';
+                    commentList.innerHTML+='<hr class="comment_hr">';
+                }
+                }
+            }
+        }
+
+    </script>
+                     
+    <script>
+        function addComment() {
+            var comment = document.getElementById('comment').value;
+            var writer = document.getElementById('writer').value;
+            var pw = document.getElementById('pw').value;
+
+            if(comment=='') {
+                alert('내용을 입력하세요');
+            } else if(writer=='') {
+                alert('닉네임을 입력하세요');
+            } else if(pw=='') {
+                alert('비밀번호를 입력하세요');
+            }
+            else {
+                //댓글 추가
+                var date = new Date();  
+                var dateStr = date.toLocaleString();
+            
+                var cmt = {
+                    nickname : writer,
+                    time : dateStr,
+                    sentence :comment,
+                    pw : pw
+                    
+                };
+
+                let cmtJson= [];
+                cmtJson= detailInfo[index].comment;
+                cmtJson.push(cmt);
+                detailInfo[index].comment=cmtJson; 
+                localStorage.setItem(info,JSON.stringify(detailInfo));
+                location.reload();
+               
+            }
+        }
+
+        function delComment(idx) {
+            var input = prompt('비밀번호를 입력하세요');
+
+            var pw = detailInfo[index].comment[idx].pw;
+            if(input==pw) {
+                delete detailInfo[index].comment[idx];
+                let cmtJson = [];
+                cmtJson=detailInfo[index].comment;
+                cmtJson.splice(idx,1);
+                detailInfo[index].comment=cmtJson;
+                localStorage.setItem(info,JSON.stringify(detailInfo));
+                alert('삭제되었습니다.');
+                location.reload();
+            } else if(input==null) {
+
+            } 
+            else {
+                alert('비밀번호가 일치하지 않습니다.');
+            }
+        }
+    </script>
+</head>
+
+<body>
+
+    <header>
+        <div class="container">
+            <div style="padding: 10 0; font:large bold; ">
+                <a href="index.html" style="font-size: 30px;">
+                    <img src="img/pinwheel.png" alt="logo"
+                        style=" margin-bottom: -4px ;width: 30px; height: 30px;">BARAMGABI
+                </a>
+
+            </div>
+        </div>
+    </header>
+    <div style="background:rgb(233, 233, 233); width:100%; height:200px;">
+        <div class="container" style=" text-align: center;">
+            <div class="main_text">
+                학교 주변 <strong>카페 / 음식점 / 술집</strong> 을 한눈에 확인해보세요
+                <form action='./search.html' method="GET" style="padding: 20;" accept-charset="UTF-8">
+                    <img class="button-img" src="img/search.png" style="width:20px; height:20px; vertical-align: sub">
+                    <input class='search_area' type="text" placeholder="매장 검색" name='search_text'>
+                    <input type="submit" value="검색">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <!-- 매장 정보 -->
+    <section class="container">
+        <hr>
+
+        <div id="top">
+            <div class="store_name">
+                <span id='store_title' class="title"></span>
+                <span style="margin-left: 10px">
+                    <img class="icon-img" src="./img/like.png"> <span id='like_num'> </span>
+                    <img class='icon-img' src='./img/comments.png'> <span id='comments_num'></span>
+                    <span id='category_name' style="color:darkgrey">
+                        cafe
+                    </span><br>
+                    <div class="store_info">
+                        <span>
+                            <img class='icon-img' src='img/world.png'><a id='store_url' href=''>홈페이지</a>
+                        </span>
+                        <span>
+                            <img class='icon-img' src='img/placeholder.png'><a id='address_url' href=""></a>
+                        </span>
+                        <span id='phone_num'>
+                        </span>
+                    </div>
+            </div>
+        </div>
+        <hr>
+        <div id="photos">
+            <h2>매장 사진</h2>
+
+
+        </div>
+        <!-- 메뉴판 -->
+        <div class="container">
+
+            <table class="menu_table">
+                <caption>메뉴판</caption>
+                <thead>
+                    <tr>
+                        <td>메뉴</td>
+                        <td>가격</td>
+                        <td>메뉴</td>
+                        <td>가격</td>
+                    </tr>
+                </thead>
+                <tbody id='menu_tbody'>
+
+                </tbody>
+            </table>
+
+            <br>
+        </div>
+        <div class='container2'>
+            <!-- 댓글 리스트-->
+            <div>
+                <span>댓글 <strong><span id='comment_num'>0</span></strong></span></span><br>
+                <hr style='border: solid 0.5px lightgray'>
+                <div id='comment_container'>
+                
+                </div>
+
+
+            </div>
+            <hr>
+            <!-- 댓글 입력 폼-->
+            
+                <div style="width: 100% ; height: 50%">
+                    <fieldset id='comment-set' style="width: 80%; height:90%;float: left;">
+                        <legend>댓글 입력</legend>
+                        <textarea class='comment_area' id='comment' placeholder="댓글을 남겨주세요"></textarea>
+
+                    </fieldset>
+                    <div
+                        style="float: right; margin-top: 5%; margin-bottom: 5%; margin-left: auto; margin-right: auto;">
+                        <input type='text' id='writer'placeholder="닉네임" maxlength='15' class='comment_info'/><br>
+                        <input type='password' id='pw'  maxlength='8' placeholder="비밀번호" class='comment_info'/><br>
+                        <input type='button' value="확인"onclick="addComment()" style='width:80%'/>
+                    </div>
+
+                </div>
+        </div>
+
+    </section>
+
+    <footer>
+        <div class="text-center"
+            style="margin: 50px; font-family: 'Courier New', Courier, monospace; text-align: center">
+            <hr>
+            Designed by 배범준 & 유인재
+        </div>
+    </footer>
+
+</body>
+
+
+</html>
