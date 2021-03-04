@@ -16,7 +16,7 @@ author: bbumjun
 navbar-links:
   Posts: "index.html"
   Archive: "archive"
-  Projects: "projects"
+  # Projects: "projects"
   # About Me: "aboutme"
   # Tags: "tags.html"
   # Resources:
