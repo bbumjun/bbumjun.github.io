@@ -18,7 +18,7 @@ navbar-links:
   Archive: "archive"
   # Projects: "projects"
   # About Me: "aboutme"
-  # Tags: "tags.html"
+  Tags: "tags.html"
   # Resources:
   #   - Beautiful Jekyll: "https://beautifuljekyll.com"
   #   - Learn markdown: "https://www.markdowntutorial.com/"
