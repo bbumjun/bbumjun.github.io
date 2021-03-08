@@ -9,7 +9,7 @@ comments: true
 
 ### css loader
 
-웹팩이 js 밖에 해석하지 때문에 이녀석이 css를 해석해준다
+웹팩이 js 밖에 해석하지 때문에 css loader가 css 파일을 string 형태로 변환해준다.
 
 ### postcss-loader
 
