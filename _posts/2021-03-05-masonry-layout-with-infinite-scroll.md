@@ -1,3 +1,11 @@
+---
+layout: post
+title: Masonry 레이아웃 구현하기
+tags: [masonry layout]
+comments: true
+---
+
+
 ### Masonry 레이아웃이 뭔가요
 
 대표적으로 핀터레스트에서 사용하는 레이아웃이다. 말이 필요없다. 그림을 보자.
@@ -73,6 +81,7 @@ css는 [scss converter](https://sass2css.herokuapp.com/) 에서 변환할 수 �
 `grid-auto-rows: 0.5rem;`는 새로운 공간에 배치될 item이 추가될 때마다 자동으로 0.5rem의 크기를 갖는 row를 생성한다는 의미인데, 뒤에 나오는 js에서 이미지의 height에 따라 grid item에게 여러개의 row를 할당할 것이다. 아래 그림에서 노랑색으로 채워진 칸은 row gap, 하얀 칸은 grid-auto-rows로 설정한 height가 된다.
 
 ![](https://images.velog.io/images/bbumjun/post/40b76f4f-ff9d-4334-b320-7d6609c56034/image.png)
+
 **javascript**
 
 ```javascript
